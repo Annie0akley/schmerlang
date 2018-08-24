@@ -37,25 +37,22 @@ i_four_of_a_kind([_,_,_,_,_]) -> 0.
 two_pairs(DiceResults) ->
   i_two_pairs(lists:sort(DiceResults)).
 
-i_two_pairs([_,B,B,A,A]) -> 2 * A + 2 * B;
-i_two_pairs([B,B,A,A,_]) -> 2 * A + 2 * B;
-i_two_pairs([B,B,_,A,A]) -> 2 * A + 2 * B;
+i_two_pairs([_,B,B,A,A]) when A /= B -> 2 * A + 2 * B;
+i_two_pairs([B,B,A,A,_]) when A /= B -> 2 * A + 2 * B;
+i_two_pairs([B,B,_,A,A]) when A /= B -> 2 * A + 2 * B;
 i_two_pairs([_,_,_,_,_]) -> 0.
 
 -spec full_house(list()) -> integer().
 full_house(DiceResults) ->
   i_full_house(lists:sort(DiceResults)).
 
-i_full_house([B,B,B,A,A]) -> 2 * A + 3 * B;
-i_full_house([A,A,B,B,B]) -> 2 * A + 3 * B;
+i_full_house([B,B,B,A,A]) when A /= B -> 2 * A + 3 * B;
+i_full_house([A,A,B,B,B]) when A /= B -> 2 * A + 3 * B;
 i_full_house([_,_,_,_,_]) -> 0.
 
 -spec yatzy(list()) -> integer().
-yatzy(DiceResults) ->
-  i_yatzy(DiceResults).
-
-i_yatzy([A,A,A,A,A]) -> 50;
-i_yatzy([_,_,_,_,_]) -> 0.
+yatzy([A,A,A,A,A]) -> 50;
+yatzy([_,_,_,_,_]) -> 0.
 
 -spec small_straight(list()) -> integer().
 small_straight(DiceResults) ->
@@ -106,10 +103,12 @@ four_of_a_kind_score_quin_test() -> 12 = four_of_a_kind([3,3,3,3,3]).
 two_pairs_score_zero_test() -> 0 = two_pairs([5,5,2,3,5]).
 two_pairs_score_ten_test() -> 10 = two_pairs([2,5,2,3,3]).
 two_pairs_score_triple_test() -> 16 = two_pairs([5,5,3,3,5]).
+two_pairs_score_not_same_test() -> 0 = two_pairs([5,5,5,5,5]).
 
 full_house_score_zero_test() -> 0 = full_house([5,5,2,3,5]).
 full_house_score_nineteen_test() -> 19 = full_house([3,5,3,3,5]).
 full_house_score_eight_test() -> 8 = full_house([1,2,2,2,1]).
+full_house_score_not_same_test() -> 0 = full_house([5,5,5,5,5]).
 
 yatzy_score_zero_test() -> 0 = yatzy([1,2,3,4,5]).
 yatzy_score_fifty_test() -> 50 = yatzy([1,1,1,1,1]).
@@ -119,4 +118,4 @@ small_straight_score_zero_test() -> 0 = small_straight([1,2,3,4,4]).
 small_straight_score_fifteen_test() -> 15 = small_straight([1,2,3,4,5]).
 
 large_straight_score_zero_test() -> 0 = large_straight([1,2,3,4,5]).
-large_straight_score_fifteen_test() -> 20 = large_straight([2,3,4,5,6]).
+large_straight_score_twenty_test() -> 20 = large_straight([2,3,4,5,6]).
