@@ -1,4 +1,13 @@
+%%%-------------------------------------------------------------------
+%%% @author ajohnston
+%%% @copyright (C) 2018, Alert Logic
+%%% @doc
+%%%
+%%% @end
+%%% Created : 24. Aug 2018 4:22 PM
+%%%-------------------------------------------------------------------
 -module(yatzy_score).
+-author("ajohnston").
 -include_lib("eunit/include/eunit.hrl").
 -export([upper/2, one_pair/1, three_of_a_kind/1, four_of_a_kind/1, two_pairs/1, full_house/1, yatzy/1, small_straight/1, large_straight/1]).
 
