@@ -74,7 +74,9 @@ groups() ->
       [fill_one_pair_test, fill_three_of_a_kind_test, fill_four_of_a_kind_test, fill_two_pairs_test, fill_yatzy_test,
         fill_full_house_test, fill_small_straight_test, fill_large_straight_test]}].
 
-upper_one_score_one_test(_Config) -> 1 = yatzy_score:upper(1,[2,2,1,8,3]).
+%% common style is to let the -> be the last thing on the line
+upper_one_score_one_test(_Config) -> 
+    1 = yatzy_score:upper(1,[2,2,1,8,3]).
 upper_one_score_two_test(_Config) -> 2 = yatzy_score:upper(1,[2,2,1,1,3]).
 upper_one_score_three_test(_Config) -> 3 = yatzy_score:upper(1,[1,1,2,1,8]).
 upper_one_score_four_test(_Config) -> 4 = yatzy_score:upper(1,[1,1,2,1,1]).
@@ -174,6 +176,9 @@ fill_ones_test(_Config) ->
   already_filled = yatzy_sheet:fill(ones, [2,1,3,1,2], Sheet).
 
 fill_twos_test(_Config) ->
+    %% I'd use get_score instead of creating Sheet2 like that.
+    %% And I'd use yatzy_sheet:new() to create Sheet1. You should only use the exported
+    %% functions of yatzy_sheet in the tests and not exploit the internal data structure.
   Sheet = #{ones => 2, twos => empty, threes => empty, fours => empty, fives => empty, sixes => empty,
     upper_total => 2, bonus => 0, one_pair => empty, three_of_a_kind => empty, four_of_a_kind => empty,
     yatzy => empty, two_pairs => empty, full_house => empty, small_straight => empty,

@@ -12,15 +12,33 @@
 -include_lib("eunit/include/eunit.hrl").
 -export([new/0, fill/3, get_score/2]).
 
--spec new() -> map().
+%% I'd introduce a sheet() or t() type 
+-type t() :: map().
+
+%% and a type for the slots:
+-type upper_slot() :: 'ones' | 'twos' | 'sixes'.
+-type lower_slot() :: 'one_pair' | 'yatzy'.
+-type derived_slot() :: 'upper_total' | 'bonus' | 'grand_total'.
+-type slot() :: upper_slot() | lower_slot() | derived_slot().
+
+-spec new() -> t(). 
 new() ->
-  #{ones => empty, twos => empty, threes => empty, fours => empty, fives => empty, sixes => empty,
-    upper_total => 0, bonus => 0, one_pair => empty, three_of_a_kind => empty, four_of_a_kind => empty,
-    yatzy => empty, two_pairs => empty, full_house => empty, small_straight => empty,
-    large_straight => empty, grand_total => 0}.
+    % just add the non-fillable slots and use maps:get/3 with 'empty' as the default
+    % value. 
+    #{ upper_total => 0,
+       bonus => 0,
+       grand_total => 0}.
+    % and then a small optimisation question: would it be easier if you tracked
+    % lower_total instead of grand_total and just calculated the grand_total every time?
 
 -spec fill(atom(), list(), map()) -> map().
 fill(ones, ResultList, Sheet) ->
+    % this is can be done a bit more to the point if you create a function 
+    % `upper_value(upper_slot()) -> 1..6.`
+    % and then write the code from i_fill_uppers right here.
+    % In the score module the i_ functions were more needed due to the need to have a
+    % sorted list. In this module you are much better served by creating helper functions
+    % and avoid the i_ functions.
   i_fill_uppers(ones, 1, ResultList, Sheet);
 
 fill(twos, ResultList, Sheet) ->
@@ -64,16 +82,23 @@ fill(large_straight, ResultList, Sheet) ->
 
 
 i_fill_lowers(Lower, ResultList, Sheet) ->
+    % this is where you can use maps:get(Lower, Sheet, empty) and avoid having to prefill
+    % the map.
+    % Or... and that is behaps even better you can pattern match on the Lower key being
+    % in the map - if so it is 'already_filled'.
   case maps:get(Lower, Sheet) of
     empty ->
       Score = i_get_lower_score(Lower, ResultList),
       Sheet2 = i_update_total(Score, Sheet),
       maps:put(Lower, Score, Sheet2);
     _ ->
-      'already_filled'
+          % only use '' around atoms when they need that to be atoms or in type specs.
+      already_filled
   end.
 
 i_get_lower_score(Lower, ResultList) ->
+    %% there is a little trick in Erlang that allows you to call
+    %% yatzy_score:Lower(ResultList) and it will just work ;-)
   case Lower of
     one_pair -> yatzy_score:one_pair(ResultList);
     three_of_a_kind -> yatzy_score:three_of_a_kind(ResultList);
@@ -95,11 +120,20 @@ i_fill_uppers(Nums, Num, ResultList, Sheet) ->
       'already_filled'
   end.
 
+
+%% This function could use a bit more pattern matching.
+i_update_upper_totals(Score, #{ bonus := 50,
+                                upper_total := UpperTotal,
+                                grand_total := GrandTotal } = Sheet) ->
+    Sheet#{ upper_total => UpperTotal + Score,
+            grand_total => GrandTotal + Score };
+% figure out how to do the rest in this style...
 i_update_upper_totals(Score, Sheet) ->
   UpperTotal = maps:get(upper_total,Sheet),
   GrandTotal = maps:get(grand_total,Sheet),
   Bonus = maps:get(bonus,Sheet),
   Sheet2 = maps:put(upper_total, UpperTotal + Score, Sheet),
+  % never use if - case is the way to go!!!!
   if
     UpperTotal >= 63 - Score, Bonus == 0 ->
       Sheet3 = maps:put(bonus, 50, Sheet2),
