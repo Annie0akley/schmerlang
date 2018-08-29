@@ -10,6 +10,7 @@
 -author("ajohnston").
 -include_lib("common_test/include/ct.hrl").
 -export([all/0, groups/0]).
+-export([roll_default_test/1, roll_keepers_ones_test/1, roll_keepers_sixes_test/1]).
 -export([upper_one_score_one_test/1, upper_one_score_two_test/1, upper_one_score_three_test/1, upper_one_score_four_test/1]).
 -export([upper_one_score_zero_test/1, upper_two_score_four_test/1, upper_two_score_zero_test/1, upper_three_score_nine_test/1]).
 -export([upper_three_score_zero_test/1, upper_four_score_twelve_test/1, upper_four_score_zero_test/1, upper_five_score_ten_test/1]).
@@ -33,7 +34,10 @@ all() ->
     {group, fill_upper_scores}, {group, fill_lower_scores}].
 
 groups() ->
-  [{upper_score,
+  [{roll_score,
+    [],
+    [roll_default_test, roll_keepers_ones_test, roll_keepers_sixes_test]},
+    {upper_score,
     [],
     [upper_one_score_one_test, upper_one_score_two_test, upper_one_score_three_test, upper_one_score_four_test,
       upper_one_score_zero_test, upper_two_score_four_test, upper_two_score_zero_test, upper_three_score_nine_test,
@@ -73,6 +77,10 @@ groups() ->
       [],
       [fill_one_pair_test, fill_three_of_a_kind_test, fill_four_of_a_kind_test, fill_two_pairs_test, fill_yatzy_test,
         fill_full_house_test, fill_small_straight_test, fill_large_straight_test]}].
+
+roll_default_test(_Config) -> [_,_,_,_,_] = yatzy_score:roll().
+roll_keepers_ones_test(_Config) -> [1,1,_,_,_] = lists:sort(yatzy_score:roll([1,1])).
+roll_keepers_sixes_test(_Config) -> [_,6,6,6,6] = lists:sort(yatzy_score:roll([6,6,6,6])).
 
 upper_one_score_one_test(_Config) -> 1 = yatzy_score:upper(1,[2,2,1,8,3]).
 upper_one_score_two_test(_Config) -> 2 = yatzy_score:upper(1,[2,2,1,1,3]).

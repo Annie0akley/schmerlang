@@ -9,7 +9,19 @@
 -module(yatzy_score).
 -author("ajohnston").
 -include_lib("eunit/include/eunit.hrl").
--export([upper/2, one_pair/1, three_of_a_kind/1, four_of_a_kind/1, two_pairs/1, full_house/1, yatzy/1, small_straight/1, large_straight/1]).
+-export([upper/2, one_pair/1, three_of_a_kind/1, four_of_a_kind/1, two_pairs/1, full_house/1, yatzy/1]).
+-export([small_straight/1, large_straight/1, roll/0, roll/1]).
+
+-spec roll() -> list().
+%% roll with no input args just rolls 5 dice and returns a list of the results
+roll() ->
+  lists:map(fun (_) -> rand:uniform(6-1) + 1 end, lists:seq(1,5)).
+
+-spec roll(list()) -> list().
+%% roll with a "keepers" list as input arg keeps the results in the list and
+%% rolls the remaining dice, returning the keepers and the new results concatenated
+roll(KeeperList) ->
+  KeeperList ++ lists:map(fun (_) -> rand:uniform(6-1) + 1 end, lists:seq(1,5 - length(KeeperList))).
 
 -spec upper(integer(), list()) -> integer().
 upper(Score, DiceResults) ->
@@ -79,6 +91,9 @@ i_large_straight([_,_,_,_,_]) -> 0.
 
 %% unit testing
 
+roll_default_test() -> [_,_,_,_,_] = roll().
+roll_keepers_ones_test() -> [1,1,_,_,_] = lists:sort(roll([1,1])).
+roll_keepers_sixes_test() -> [_,6,6,6,6] = lists:sort(roll([6,6,6,6])).
 upper_one_score_one_test() -> 1 = upper(1,[2,2,1,8,3]).
 upper_one_score_two_test() -> 2 = upper(1,[2,2,1,1,3]).
 upper_one_score_three_test() -> 3 = upper(1,[1,1,2,1,8]).
