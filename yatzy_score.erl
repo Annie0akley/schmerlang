@@ -8,7 +8,9 @@
 %%%-------------------------------------------------------------------
 -module(yatzy_score).
 -author("ajohnston").
+
 -include_lib("eunit/include/eunit.hrl").
+
 -export([upper/2, one_pair/1, three_of_a_kind/1, four_of_a_kind/1, two_pairs/1, full_house/1, yatzy/1]).
 -export([small_straight/1, large_straight/1, roll/0, roll/1]).
 
@@ -72,7 +74,9 @@ i_full_house([A,A,B,B,B]) when A /= B -> 2 * A + 3 * B;
 i_full_house([_,_,_,_,_]) -> 0.
 
 -spec yatzy(list()) -> integer().
-yatzy([A,A,A,A,A]) -> 50;
+yatzy([A,A,A,A,A]) ->
+  io:format("*** CONGRATULATIONS YATZY is worth 50 points ***~n",[]),
+  50;
 yatzy([_,_,_,_,_]) -> 0.
 
 -spec small_straight(list()) -> integer().

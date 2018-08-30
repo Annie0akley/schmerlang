@@ -8,7 +8,9 @@
 %%%-------------------------------------------------------------------
 -module(yatzy_SUITE).
 -author("ajohnston").
+
 -include_lib("common_test/include/ct.hrl").
+
 -export([all/0, groups/0]).
 -export([roll_default_test/1, roll_keepers_ones_test/1, roll_keepers_sixes_test/1]).
 -export([upper_one_score_one_test/1, upper_one_score_two_test/1, upper_one_score_three_test/1, upper_one_score_four_test/1]).

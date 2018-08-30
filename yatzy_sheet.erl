@@ -10,6 +10,7 @@
 -author("ajohnston").
 
 -include_lib("eunit/include/eunit.hrl").
+
 -export([new/0, fill/3, get_score/2]).
 
 -spec new() -> map().
@@ -60,8 +61,11 @@ fill(small_straight, ResultList, Sheet) ->
   i_fill_lowers(small_straight, ResultList, Sheet);
 
 fill(large_straight, ResultList, Sheet) ->
-  i_fill_lowers(large_straight, ResultList, Sheet).
+  i_fill_lowers(large_straight, ResultList, Sheet);
 
+fill(_A, ResultList, Sheet) ->
+  io:format("No such slot as ~w ",[_A]),
+  Sheet.
 
 i_fill_lowers(Lower, ResultList, Sheet) ->
   case maps:get(Lower, Sheet) of
@@ -102,6 +106,7 @@ i_update_upper_totals(Score, Sheet) ->
   Sheet2 = maps:put(upper_total, UpperTotal + Score, Sheet),
   if
     UpperTotal >= 63 - Score, Bonus == 0 ->
+      io:format("*** Upper Total reached 63 - Bonus of 50 ***~n",[]),
       Sheet3 = maps:put(bonus, 50, Sheet2),
       maps:put(grand_total, 50 + GrandTotal + Score, Sheet3);
     true ->
