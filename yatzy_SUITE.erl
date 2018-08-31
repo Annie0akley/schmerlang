@@ -25,6 +25,7 @@
 -export([yatzy_score_zero_test/1, yatzy_score_fifty_test/1, yatzy_score_fifty_again_test/1]).
 -export([small_straight_score_zero_test/1, small_straight_score_fifteen_test/1]).
 -export([large_straight_score_zero_test/1, large_straight_score_twenty_test/1]).
+-export([all_filled_true_test/1, all_filled_false_test/1]).
 -export([create_new_sheet_test/1, get_bonus_score_test/1, get_grand_total_score_test/1, get_all_uppers_score_test/1, get_all_lowers_score_test/1]).
 -export([fill_ones_test/1, fill_twos_test/1, fill_threes_test/1, fill_fours_test/1, fill_fives_test/1, fill_sixes_test/1]).
 -export([fill_one_pair_test/1, fill_three_of_a_kind_test/1, fill_four_of_a_kind_test/1, fill_two_pairs_test/1, fill_yatzy_test/1]).
@@ -71,7 +72,8 @@ groups() ->
       [large_straight_score_zero_test, large_straight_score_twenty_test]},
     {get_scores,
       [],
-      [create_new_sheet_test, get_bonus_score_test, get_grand_total_score_test, get_all_uppers_score_test, get_all_lowers_score_test]},
+      [all_filled_true_test, all_filled_false_test, create_new_sheet_test, get_bonus_score_test, get_grand_total_score_test,
+        get_all_uppers_score_test, get_all_lowers_score_test]},
     {fill_upper_scores,
       [],
       [fill_ones_test, fill_twos_test, fill_threes_test, fill_fours_test, fill_fives_test, fill_sixes_test]},
@@ -132,6 +134,20 @@ small_straight_score_fifteen_test(_Config) -> 15 = yatzy_score:small_straight([1
 
 large_straight_score_zero_test(_Config) -> 0 = yatzy_score:large_straight([1,2,3,4,5]).
 large_straight_score_twenty_test(_Config) -> 20 = yatzy_score:large_straight([2,3,4,5,6]).
+
+all_filled_true_test(_Config) ->
+  Sheet = #{ones => 3, twos => 6, threes => 9, fours => 12, fives => 10, sixes => 6,
+    upper_total => 46, bonus => 0, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 16,
+    yatzy => 0, two_pairs => 0, full_house => 0, small_straight => 0,
+    large_straight => 0, grand_total => 0},
+  true = yatzy_sheet:all_filled(Sheet).
+
+all_filled_false_test(_Config) ->
+  Sheet = #{ones => empty, twos => 6, threes => 9, fours => 12, fives => 10, sixes => 6,
+    upper_total => 46, bonus => 0, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 16,
+    yatzy => 0, two_pairs => 0, full_house => 0, small_straight => 0,
+    large_straight => 0, grand_total => 0},
+  false = yatzy_sheet:all_filled(Sheet).
 
 create_new_sheet_test(_Config) ->
   Sheet = #{ones => empty, twos => empty, threes => empty, fours => empty, fives => empty, sixes => empty,

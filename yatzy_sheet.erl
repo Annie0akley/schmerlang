@@ -11,7 +11,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--export([new/0, fill/3, get_score/2]).
+-export([new/0, fill/3, get_score/2, all_filled/1]).
 
 -spec new() -> map().
 new() ->
@@ -20,7 +20,7 @@ new() ->
     yatzy => empty, two_pairs => empty, full_house => empty, small_straight => empty,
     large_straight => empty, grand_total => 0}.
 
--spec fill(atom(), list(), map()) -> map().
+-spec fill(atom(), ResultList::list(integer()), Sheet::map()) -> map().
 fill(ones, ResultList, Sheet) ->
   i_fill_uppers(ones, 1, ResultList, Sheet);
 
@@ -63,9 +63,18 @@ fill(small_straight, ResultList, Sheet) ->
 fill(large_straight, ResultList, Sheet) ->
   i_fill_lowers(large_straight, ResultList, Sheet);
 
-fill(_A, ResultList, Sheet) ->
+fill(_A, _ResultList, Sheet) ->
   io:format("No such slot as ~w ",[_A]),
   Sheet.
+
+-spec all_filled(Sheet::map()) -> atom().
+all_filled(Sheet) ->
+  ValueList = maps:values(Sheet),
+  not lists:member(empty,ValueList).
+
+-spec get_score(Nums::atom(), Sheet::map()) -> integer().
+get_score(Nums, Sheet) ->
+  maps:get(Nums, Sheet).
 
 i_fill_lowers(Lower, ResultList, Sheet) ->
   case maps:get(Lower, Sheet) of
@@ -104,24 +113,37 @@ i_update_upper_totals(Score, Sheet) ->
   GrandTotal = maps:get(grand_total,Sheet),
   Bonus = maps:get(bonus,Sheet),
   Sheet2 = maps:put(upper_total, UpperTotal + Score, Sheet),
-  if
-    UpperTotal >= 63 - Score, Bonus == 0 ->
-      io:format("*** Upper Total reached 63 - Bonus of 50 ***~n",[]),
-      Sheet3 = maps:put(bonus, 50, Sheet2),
-      maps:put(grand_total, 50 + GrandTotal + Score, Sheet3);
-    true ->
-      maps:put(grand_total, GrandTotal + Score, Sheet2)
-  end.
+  Sheet3 = maps:put(grand_total, GrandTotal + Score, Sheet2),
+  i_update_bonus(Bonus, UpperTotal + Score, Sheet3).
+
+i_update_bonus(0, UpperTotal, Sheet) when UpperTotal >= 63 ->
+  io:format("*** Upper Total reached 63 - Bonus of 50 ***~n",[]),
+  Sheet2 = maps:put(bonus, 50, Sheet),
+  GrandTotal = maps:get(grand_total,Sheet2),
+  maps:put(grand_total, 50 + GrandTotal, Sheet2);
+
+i_update_bonus(_, _UpperTotal, Sheet) ->
+  Sheet.
 
 i_update_total(Score, Sheet) ->
   GrandTotal = maps:get(grand_total,Sheet),
   maps:put(grand_total, GrandTotal + Score, Sheet).
 
--spec get_score(atom(), map()) -> integer().
-get_score(Nums, Sheet) ->
-  maps:get(Nums, Sheet).
-
 %% unit testing
+
+all_filled_true_test() ->
+  Sheet = #{ones => 3, twos => 6, threes => 9, fours => 12, fives => 10, sixes => 6,
+    upper_total => 46, bonus => 0, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 16,
+    yatzy => 0, two_pairs => 0, full_house => 0, small_straight => 0,
+    large_straight => 0, grand_total => 0},
+  true = all_filled(Sheet).
+
+all_filled_false_test() ->
+  Sheet = #{ones => empty, twos => 6, threes => 9, fours => 12, fives => 10, sixes => 6,
+    upper_total => 46, bonus => 0, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 16,
+    yatzy => 0, two_pairs => 0, full_house => 0, small_straight => 0,
+    large_straight => 0, grand_total => 0},
+  false = all_filled(Sheet).
 
 create_new_sheet_test() ->
   Sheet = #{ones => empty, twos => empty, threes => empty, fours => empty, fives => empty, sixes => empty,
