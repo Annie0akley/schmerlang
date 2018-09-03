@@ -82,58 +82,101 @@ groups() ->
       [fill_one_pair_test, fill_three_of_a_kind_test, fill_four_of_a_kind_test, fill_two_pairs_test, fill_yatzy_test,
         fill_full_house_test, fill_small_straight_test, fill_large_straight_test]}].
 
-roll_default_test(_Config) -> [_,_,_,_,_] = yatzy_score:roll().
-roll_keepers_ones_test(_Config) -> [1,1,_,_,_] = lists:sort(yatzy_score:roll([1,1])).
-roll_keepers_sixes_test(_Config) -> [_,6,6,6,6] = lists:sort(yatzy_score:roll([6,6,6,6])).
+roll_default_test(_Config) -> 
+  [_,_,_,_,_] = yatzy_score:roll().
+roll_keepers_ones_test(_Config) -> 
+  [1,1,_,_,_] = lists:sort(yatzy_score:roll([1,1])).
+roll_keepers_sixes_test(_Config) -> 
+  [_,6,6,6,6] = lists:sort(yatzy_score:roll([6,6,6,6])).
 
-upper_one_score_one_test(_Config) -> 1 = yatzy_score:upper(1,[2,2,1,8,3]).
-upper_one_score_two_test(_Config) -> 2 = yatzy_score:upper(1,[2,2,1,1,3]).
-upper_one_score_three_test(_Config) -> 3 = yatzy_score:upper(1,[1,1,2,1,8]).
-upper_one_score_four_test(_Config) -> 4 = yatzy_score:upper(1,[1,1,2,1,1]).
-upper_one_score_zero_test(_Config) -> 0 = yatzy_score:upper(1,[5,5,2,5,3]).
-upper_two_score_four_test(_Config) -> 4 = yatzy_score:upper(2,[2,1,2,1,3]).
-upper_two_score_zero_test(_Config) -> 0 = yatzy_score:upper(2,[5,5,1,5,3]).
-upper_three_score_nine_test(_Config) -> 9 = yatzy_score:upper(3,[1,3,3,1,3]).
-upper_three_score_zero_test(_Config) -> 0 = yatzy_score:upper(3,[5,5,2,5,1]).
-upper_four_score_twelve_test(_Config) -> 12 = yatzy_score:upper(4,[1,4,4,1,4]).
-upper_four_score_zero_test(_Config) -> 0 = yatzy_score:upper(4,[5,5,1,5,3]).
-upper_five_score_ten_test(_Config) -> 10 = yatzy_score:upper(5,[5,1,5,1,3]).
-upper_five_score_zero_test(_Config) -> 0 = yatzy_score:upper(5,[1,1,2,1,1]).
-upper_six_score_thirty_test(_Config) -> 30 = yatzy_score:upper(6,[6,6,6,6,6]).
-upper_six_score_zero_test(_Config) -> 0 = yatzy_score:upper(6,[5,5,1,5,3]).
+upper_one_score_one_test(_Config) -> 
+  1 = yatzy_score:upper(1,[2,2,1,8,3]).
+upper_one_score_two_test(_Config) -> 
+  2 = yatzy_score:upper(1,[2,2,1,1,3]).
+upper_one_score_three_test(_Config) -> 
+  3 = yatzy_score:upper(1,[1,1,2,1,8]).
+upper_one_score_four_test(_Config) -> 
+  4 = yatzy_score:upper(1,[1,1,2,1,1]).
+upper_one_score_zero_test(_Config) -> 
+  0 = yatzy_score:upper(1,[5,5,2,5,3]).
+upper_two_score_four_test(_Config) -> 
+  4 = yatzy_score:upper(2,[2,1,2,1,3]).
+upper_two_score_zero_test(_Config) -> 
+  0 = yatzy_score:upper(2,[5,5,1,5,3]).
+upper_three_score_nine_test(_Config) -> 
+  9 = yatzy_score:upper(3,[1,3,3,1,3]).
+upper_three_score_zero_test(_Config) -> 
+  0 = yatzy_score:upper(3,[5,5,2,5,1]).
+upper_four_score_twelve_test(_Config) -> 
+  12 = yatzy_score:upper(4,[1,4,4,1,4]).
+upper_four_score_zero_test(_Config) -> 
+  0 = yatzy_score:upper(4,[5,5,1,5,3]).
+upper_five_score_ten_test(_Config) -> 
+  10 = yatzy_score:upper(5,[5,1,5,1,3]).
+upper_five_score_zero_test(_Config) -> 
+  0 = yatzy_score:upper(5,[1,1,2,1,1]).
+upper_six_score_thirty_test(_Config) -> 
+  30 = yatzy_score:upper(6,[6,6,6,6,6]).
+upper_six_score_zero_test(_Config) -> 
+  0 = yatzy_score:upper(6,[5,5,1,5,3]).
 
-one_pair_score_ten_test(_Config) -> 10 = yatzy_score:one_pair([1,5,2,3,5]).
-one_pair_score_highest_pair_test(_Config) -> 12 = yatzy_score:one_pair([1,6,1,3,6]).
-one_pair_score_zero_test(_Config) -> 0 = yatzy_score:one_pair([1,2,4,3,6]).
-one_pair_score_triple_test(_Config) -> 8 = yatzy_score:one_pair([4,2,4,3,4]).
+one_pair_score_ten_test(_Config) -> 
+  10 = yatzy_score:one_pair([1,5,2,3,5]).
+one_pair_score_highest_pair_test(_Config) -> 
+  12 = yatzy_score:one_pair([1,6,1,3,6]).
+one_pair_score_zero_test(_Config) -> 
+  0 = yatzy_score:one_pair([1,2,4,3,6]).
+one_pair_score_triple_test(_Config) -> 
+  8 = yatzy_score:one_pair([4,2,4,3,4]).
 
-three_of_a_kind_score_zero_test(_Config) -> 0 = yatzy_score:three_of_a_kind([1,5,2,3,5]).
-three_of_a_kind_score_nine_test(_Config) -> 9 = yatzy_score:three_of_a_kind([3,5,2,3,3]).
-three_of_a_kind_score_quad_test(_Config) -> 6 = yatzy_score:three_of_a_kind([2,2,2,3,2]).
+three_of_a_kind_score_zero_test(_Config) -> 
+  0 = yatzy_score:three_of_a_kind([1,5,2,3,5]).
+three_of_a_kind_score_nine_test(_Config) -> 
+  9 = yatzy_score:three_of_a_kind([3,5,2,3,3]).
+three_of_a_kind_score_quad_test(_Config) -> 
+  6 = yatzy_score:three_of_a_kind([2,2,2,3,2]).
 
-four_of_a_kind_score_zero_test(_Config) -> 0 = yatzy_score:four_of_a_kind([5,5,2,3,5]).
-four_of_a_kind_score_eight_test(_Config) -> 8 = yatzy_score:four_of_a_kind([2,5,2,2,2]).
-four_of_a_kind_score_quin_test(_Config) -> 12 = yatzy_score:four_of_a_kind([3,3,3,3,3]).
+four_of_a_kind_score_zero_test(_Config) -> 
+  0 = yatzy_score:four_of_a_kind([5,5,2,3,5]).
+four_of_a_kind_score_eight_test(_Config) -> 
+  8 = yatzy_score:four_of_a_kind([2,5,2,2,2]).
+four_of_a_kind_score_quin_test(_Config) -> 
+  12 = yatzy_score:four_of_a_kind([3,3,3,3,3]).
 
-two_pairs_score_zero_test(_Config) -> 0 = yatzy_score:two_pairs([5,5,2,3,5]).
-two_pairs_score_ten_test(_Config) -> 10 = yatzy_score:two_pairs([2,5,2,3,3]).
-two_pairs_score_triple_test(_Config) -> 16 = yatzy_score:two_pairs([5,5,3,3,5]).
-two_pairs_score_not_same_test(_Config) -> 0 = yatzy_score:two_pairs([5,5,5,5,5]).
+two_pairs_score_zero_test(_Config) -> 
+  0 = yatzy_score:two_pairs([5,5,2,3,5]).
+two_pairs_score_ten_test(_Config) -> 
+  10 = yatzy_score:two_pairs([2,5,2,3,3]).
+two_pairs_score_triple_test(_Config) -> 
+  16 = yatzy_score:two_pairs([5,5,3,3,5]).
+two_pairs_score_not_same_test(_Config) -> 
+  0 = yatzy_score:two_pairs([5,5,5,5,5]).
 
-full_house_score_zero_test(_Config) -> 0 = yatzy_score:full_house([5,5,2,3,5]).
-full_house_score_nineteen_test(_Config) -> 19 = yatzy_score:full_house([3,5,3,3,5]).
-full_house_score_eight_test(_Config) -> 8 = yatzy_score:full_house([1,2,2,2,1]).
-full_house_score_not_same_test(_Config) -> 0 = yatzy_score:full_house([5,5,5,5,5]).
+full_house_score_zero_test(_Config) -> 
+  0 = yatzy_score:full_house([5,5,2,3,5]).
+full_house_score_nineteen_test(_Config) -> 
+  19 = yatzy_score:full_house([3,5,3,3,5]).
+full_house_score_eight_test(_Config) -> 
+  8 = yatzy_score:full_house([1,2,2,2,1]).
+full_house_score_not_same_test(_Config) -> 
+  0 = yatzy_score:full_house([5,5,5,5,5]).
 
-yatzy_score_zero_test(_Config) -> 0 = yatzy_score:yatzy([1,2,3,4,5]).
-yatzy_score_fifty_test(_Config) -> 50 = yatzy_score:yatzy([1,1,1,1,1]).
-yatzy_score_fifty_again_test(_Config) -> 50 = yatzy_score:yatzy([6,6,6,6,6]).
+yatzy_score_zero_test(_Config) -> 
+  0 = yatzy_score:yatzy([1,2,3,4,5]).
+yatzy_score_fifty_test(_Config) -> 
+  50 = yatzy_score:yatzy([1,1,1,1,1]).
+yatzy_score_fifty_again_test(_Config) -> 
+  50 = yatzy_score:yatzy([6,6,6,6,6]).
 
-small_straight_score_zero_test(_Config) -> 0 = yatzy_score:small_straight([1,2,3,4,4]).
-small_straight_score_fifteen_test(_Config) -> 15 = yatzy_score:small_straight([1,2,3,4,5]).
+small_straight_score_zero_test(_Config) -> 
+  0 = yatzy_score:small_straight([1,2,3,4,4]).
+small_straight_score_fifteen_test(_Config) -> 
+  15 = yatzy_score:small_straight([1,2,3,4,5]).
 
-large_straight_score_zero_test(_Config) -> 0 = yatzy_score:large_straight([1,2,3,4,5]).
-large_straight_score_twenty_test(_Config) -> 20 = yatzy_score:large_straight([2,3,4,5,6]).
+large_straight_score_zero_test(_Config) -> 
+  0 = yatzy_score:large_straight([1,2,3,4,5]).
+large_straight_score_twenty_test(_Config) -> 
+  20 = yatzy_score:large_straight([2,3,4,5,6]).
 
 all_filled_true_test(_Config) ->
   Sheet = #{ones => 3, twos => 6, threes => 9, fours => 12, fives => 10, sixes => 6,
@@ -200,6 +243,9 @@ fill_ones_test(_Config) ->
   already_filled = yatzy_sheet:fill(ones, [2,1,3,1,2], Sheet).
 
 fill_twos_test(_Config) ->
+    %% I'd use get_score instead of creating Sheet2 like that.
+    %% And I'd use yatzy_sheet:new() to create Sheet1. You should only use the exported
+    %% functions of yatzy_sheet in the tests and not exploit the internal data structure.
   Sheet = #{ones => 2, twos => empty, threes => empty, fours => empty, fives => empty, sixes => empty,
     upper_total => 2, bonus => 0, one_pair => empty, three_of_a_kind => empty, four_of_a_kind => empty,
     yatzy => empty, two_pairs => empty, full_house => empty, small_straight => empty,
