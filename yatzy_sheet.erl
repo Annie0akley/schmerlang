@@ -10,14 +10,15 @@
 -author("ajohnston").
 
 -include_lib("eunit/include/eunit.hrl").
--export([new/0, fill/3, get_score/2]).
+
+-export([new/0, fill/3, get_score/2, all_filled/1]).
 
 %% I'd introduce a sheet() or t() type 
 -type t() :: map().
 
 %% and a type for the slots:
--type upper_slot() :: 'ones' | 'twos' | 'sixes'.
--type lower_slot() :: 'one_pair' | 'yatzy'.
+-type upper_slot() :: 'ones' | 'twos' | 'threes' | 'fours' | 'fives' |'sixes'.
+-type lower_slot() :: 'one_pair' | 'two_pairs' | 'full_house' | 'three_of_a_kind' | 'four_of_a_kind' | 'small_straight' | 'large_straight' | 'yatzy'.
 -type derived_slot() :: 'upper_total' | 'bonus' | 'grand_total'.
 -type slot() :: upper_slot() | lower_slot() | derived_slot().
 
@@ -27,11 +28,11 @@ new() ->
     % value. 
     #{ upper_total => 0,
        bonus => 0,
-       grand_total => 0}.
+       lower_total => 0}.
     % and then a small optimisation question: would it be easier if you tracked
     % lower_total instead of grand_total and just calculated the grand_total every time?
 
--spec fill(atom(), list(), map()) -> map().
+-spec fill(atom(), ResultList::list(integer()), Sheet::map()) -> map().
 fill(ones, ResultList, Sheet) ->
     % this is can be done a bit more to the point if you create a function 
     % `upper_value(upper_slot()) -> 1..6.`
@@ -78,8 +79,20 @@ fill(small_straight, ResultList, Sheet) ->
   i_fill_lowers(small_straight, ResultList, Sheet);
 
 fill(large_straight, ResultList, Sheet) ->
-  i_fill_lowers(large_straight, ResultList, Sheet).
+  i_fill_lowers(large_straight, ResultList, Sheet);
 
+fill(_A, _ResultList, Sheet) ->
+  io:format("No such slot as ~w ",[_A]),
+  Sheet.
+
+-spec all_filled(Sheet::map()) -> atom().
+all_filled(Sheet) ->
+  ValueList = maps:values(Sheet),
+  not lists:member(empty,ValueList).
+
+-spec get_score(Nums::atom(), Sheet::map()) -> integer().
+get_score(Nums, Sheet) ->
+  maps:get(Nums, Sheet).
 
 i_fill_lowers(Lower, ResultList, Sheet) ->
     % this is where you can use maps:get(Lower, Sheet, empty) and avoid having to prefill
@@ -120,37 +133,42 @@ i_fill_uppers(Nums, Num, ResultList, Sheet) ->
       'already_filled'
   end.
 
-
-%% This function could use a bit more pattern matching.
-i_update_upper_totals(Score, #{ bonus := 50,
-                                upper_total := UpperTotal,
-                                grand_total := GrandTotal } = Sheet) ->
-    Sheet#{ upper_total => UpperTotal + Score,
-            grand_total => GrandTotal + Score };
-% figure out how to do the rest in this style...
 i_update_upper_totals(Score, Sheet) ->
   UpperTotal = maps:get(upper_total,Sheet),
   GrandTotal = maps:get(grand_total,Sheet),
   Bonus = maps:get(bonus,Sheet),
   Sheet2 = maps:put(upper_total, UpperTotal + Score, Sheet),
-  % never use if - case is the way to go!!!!
-  if
-    UpperTotal >= 63 - Score, Bonus == 0 ->
-      Sheet3 = maps:put(bonus, 50, Sheet2),
-      maps:put(grand_total, 50 + GrandTotal + Score, Sheet3);
-    true ->
-      maps:put(grand_total, GrandTotal + Score, Sheet2)
-  end.
+  Sheet3 = maps:put(grand_total, GrandTotal + Score, Sheet2),
+  i_update_bonus(Bonus, UpperTotal + Score, Sheet3).
+
+i_update_bonus(0, UpperTotal, Sheet) when UpperTotal >= 63 ->
+  io:format("*** Upper Total reached 63 - Bonus of 50 ***~n",[]),
+  Sheet2 = maps:put(bonus, 50, Sheet),
+  GrandTotal = maps:get(grand_total,Sheet2),
+  maps:put(grand_total, 50 + GrandTotal, Sheet2);
+
+i_update_bonus(_, _UpperTotal, Sheet) ->
+  Sheet.
 
 i_update_total(Score, Sheet) ->
   GrandTotal = maps:get(grand_total,Sheet),
   maps:put(grand_total, GrandTotal + Score, Sheet).
 
--spec get_score(atom(), map()) -> integer().
-get_score(Nums, Sheet) ->
-  maps:get(Nums, Sheet).
-
 %% unit testing
+
+all_filled_true_test() ->
+  Sheet = #{ones => 3, twos => 6, threes => 9, fours => 12, fives => 10, sixes => 6,
+    upper_total => 46, bonus => 0, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 16,
+    yatzy => 0, two_pairs => 0, full_house => 0, small_straight => 0,
+    large_straight => 0, grand_total => 0},
+  true = all_filled(Sheet).
+
+all_filled_false_test() ->
+  Sheet = #{ones => empty, twos => 6, threes => 9, fours => 12, fives => 10, sixes => 6,
+    upper_total => 46, bonus => 0, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 16,
+    yatzy => 0, two_pairs => 0, full_house => 0, small_straight => 0,
+    large_straight => 0, grand_total => 0},
+  false = all_filled(Sheet).
 
 create_new_sheet_test() ->
   Sheet = #{ones => empty, twos => empty, threes => empty, fours => empty, fives => empty, sixes => empty,

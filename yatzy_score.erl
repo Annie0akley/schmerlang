@@ -8,16 +8,31 @@
 %%%-------------------------------------------------------------------
 -module(yatzy_score).
 -author("ajohnston").
+
 -include_lib("eunit/include/eunit.hrl").
--export([upper/2, one_pair/1, three_of_a_kind/1, four_of_a_kind/1, two_pairs/1, full_house/1, yatzy/1, small_straight/1, large_straight/1]).
 
--spec upper(integer(), list()) -> integer().
-upper(Score, DiceResults) ->
-  length([X || X <- DiceResults, X==Score]) * Score.
+-export([upper/2, one_pair/1, three_of_a_kind/1, four_of_a_kind/1, two_pairs/1, full_house/1, yatzy/1]).
+-export([small_straight/1, large_straight/1, roll/0, roll/1]).
 
--spec one_pair(list()) -> integer().
-one_pair(DiceResults) ->
-  i_one_pair(lists:sort(DiceResults)).
+-spec roll() -> list(integer()).
+%%% roll with no input just rolls 5 (imaginary) dice and returns a list of the 5 results
+roll() ->
+  lists:map(fun (_) -> rand:uniform(6) end, lists:seq(1,5)).
+
+-spec roll(KeeperList::list(integer())) -> list(integer()).
+%%% roll with a "keepers" list as input, keeps the results in the first list and
+%%% rolls the remaining dice, returning a concatenation of the keepers and the new results
+roll(KeeperList) ->
+  KeeperList ++ lists:map(fun (_) -> rand:uniform(6) end, lists:seq(1,5 - length(KeeperList))).
+
+-spec upper(Score::integer(), Dice::list()) -> integer().
+upper(Score, Dice) ->
+    lists:sum( lists:filter( fun (Eyes) -> Eyes == Score end, Dice ) ).
+
+-spec one_pair(Dice::list(integer())) -> integer().
+%%% one_pair takes the list of dice results and returns the value for the one_pair slot
+one_pair(Dice) ->
+  i_one_pair(lists:sort(Dice)).
 
 i_one_pair([_,_,_,A,A]) -> 2 * A;
 i_one_pair([_,_,A,A,_]) -> 2 * A;
@@ -25,34 +40,38 @@ i_one_pair([_,A,A,_,_]) -> 2 * A;
 i_one_pair([A,A,_,_,_]) -> 2 * A;
 i_one_pair([_,_,_,_,_]) -> 0.
 
--spec three_of_a_kind(list()) -> integer().
-three_of_a_kind(DiceResults) ->
-  i_three_of_a_kind(lists:sort(DiceResults)).
+-spec three_of_a_kind(Dice::list(integer())) -> integer().
+%%% three_of_a_kind takes the list of dice results and returns the value for the three_of_a_kind slot
+three_of_a_kind(Dice) ->
+  i_three_of_a_kind(lists:sort(Dice)).
 
 i_three_of_a_kind([_,_,A,A,A]) -> 3 * A;
 i_three_of_a_kind([_,A,A,A,_]) -> 3 * A;
 i_three_of_a_kind([A,A,A,_,_]) -> 3 * A;
 i_three_of_a_kind([_,_,_,_,_]) -> 0.
 
--spec four_of_a_kind(list()) -> integer().
-four_of_a_kind(DiceResults) ->
-  i_four_of_a_kind(lists:sort(DiceResults)).
+-spec four_of_a_kind(Dice::list(integer())) -> integer().
+%%% four_of_a_kind takes the list of dice results and returns the value for the four_of_a_kind slot
+four_of_a_kind(Dice) ->
+  i_four_of_a_kind(lists:sort(Dice)).
 
 i_four_of_a_kind([_,A,A,A,A]) -> 4 * A;
 i_four_of_a_kind([A,A,A,A,_]) -> 4 * A;
 i_four_of_a_kind([_,_,_,_,_]) -> 0.
 
--spec two_pairs(list()) -> integer().
-two_pairs(DiceResults) ->
-  i_two_pairs(lists:sort(DiceResults)).
+-spec two_pairs(Dice::list(integer())) -> integer().
+%%% two_pairs takes the list of dice results and returns the value for the two_pairs slot
+two_pairs(Dice) ->
+  i_two_pairs(lists:sort(Dice)).
 
 i_two_pairs([_,B,B,A,A]) when A /= B -> 2 * A + 2 * B;
 i_two_pairs([B,B,A,A,_]) when A /= B -> 2 * A + 2 * B;
 i_two_pairs([B,B,_,A,A]) when A /= B -> 2 * A + 2 * B;
 i_two_pairs([_,_,_,_,_]) -> 0.
 
--spec full_house(list()) -> integer().
-full_house(DiceResults) ->
+-spec full_house(Dice::list(integer())) -> integer().
+%%% full_house takes the list of dice results and returns the value for the full_house slot
+full_house(Dice) ->
   i_full_house(lists:sort(DiceResults)).
 
 i_full_house([B,B,B,A,A]) when A /= B -> 2 * A + 3 * B;
@@ -60,25 +79,33 @@ i_full_house([A,A,B,B,B]) when A /= B -> 2 * A + 3 * B;
 i_full_house([_,_,_,_,_]) -> 0.
 
 -spec yatzy(list()) -> integer().
-yatzy([A,A,A,A,A]) -> 50;
+%%% yatzy takes the list of dice results and returns the value for the yatzy slot
+yatzy([A,A,A,A,A]) ->
+  io:format("*** CONGRATULATIONS YATZY is worth 50 points ***~n",[]),
+  50;
 yatzy([_,_,_,_,_]) -> 0.
 
--spec small_straight(list()) -> integer().
-small_straight(DiceResults) ->
-  i_small_straight(lists:sort(DiceResults)).
+-spec small_straight(Dice::list(integer())) -> integer().
+%%% small_straight takes the list of dice results and returns the value for the small_straight slot
+small_straight(Dice) ->
+  i_small_straight(lists:sort(Dice)).
 
 i_small_straight([1,2,3,4,5]) -> 15;
 i_small_straight([_,_,_,_,_]) -> 0.
 
--spec large_straight(list()) -> integer().
-large_straight(DiceResults) ->
-  i_large_straight(lists:sort(DiceResults)).
+-spec large_straight(Dice::list(integer())) -> integer().
+%%% large_straight takes the list of dice results and returns the value for the large_straight slot
+large_straight(Dice) ->
+  i_large_straight(lists:sort(Dice)).
 
 i_large_straight([2,3,4,5,6]) -> 20;
 i_large_straight([_,_,_,_,_]) -> 0.
 
 %% unit testing
 
+roll_default_test() -> [_,_,_,_,_] = roll().
+roll_keepers_ones_test() -> [1,1,_,_,_] = lists:sort(roll([1,1])).
+roll_keepers_sixes_test() -> [_,6,6,6,6] = lists:sort(roll([6,6,6,6])).
 upper_one_score_one_test() -> 1 = upper(1,[2,2,1,8,3]).
 upper_one_score_two_test() -> 2 = upper(1,[2,2,1,1,3]).
 upper_one_score_three_test() -> 3 = upper(1,[1,1,2,1,8]).
