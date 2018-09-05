@@ -31,11 +31,12 @@
 -export([fill_ones_test/1, fill_twos_test/1, fill_threes_test/1, fill_fours_test/1, fill_fives_test/1, fill_sixes_test/1]).
 -export([fill_one_pair_test/1, fill_three_of_a_kind_test/1, fill_four_of_a_kind_test/1, fill_two_pairs_test/1, fill_yatzy_test/1]).
 -export([fill_full_house_test/1, fill_small_straight_test/1, fill_large_straight_test/1]).
+-export([start_game_test/1]).
 
 all() ->
     [{group, upper_score}, {group, one_pair_score}, {group, three_of_a_kind_score}, {group, four_of_a_kind_score}, {group, two_pairs_score},
         {group, full_house_score}, {group, yatzy_score}, {group, small_straight_score}, {group, large_straight_score}, {group, get_scores},
-        {group, fill_upper_scores}, {group, fill_lower_scores}].
+        {group, fill_upper_scores}, {group, fill_lower_scores}, {group, yatzy_player}].
 
 groups() ->
     [
@@ -108,6 +109,11 @@ groups() ->
             [],
             [fill_one_pair_test, fill_three_of_a_kind_test, fill_four_of_a_kind_test, fill_two_pairs_test, fill_yatzy_test,
             fill_full_house_test, fill_small_straight_test, fill_large_straight_test]
+        },
+        {
+            yatzy_player,
+            [],
+            [start_game_test]
         }
     ].
 
@@ -212,14 +218,14 @@ all_filled_true_test(_Config) ->
         upper_total => 46, bonus => 0, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 16,
         yatzy => 0, two_pairs => 0, full_house => 0, small_straight => 0,
         large_straight => 0, lower_total => 0},
-    true = yatzy_sheet:all_filled(Sheet).
+    true = yatzy_sheet:all_slots_filled(Sheet).
 
 all_filled_false_test(_Config) ->
     Sheet = #{twos => 6, threes => 9, fours => 12, fives => 10, sixes => 6,
         upper_total => 46, bonus => 0, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 16,
         yatzy => 0, two_pairs => 0, full_house => 0, small_straight => 0,
         large_straight => 0, lower_total => 0},
-    false = yatzy_sheet:all_filled(Sheet).
+    false = yatzy_sheet:all_slots_filled(Sheet).
 
 create_new_sheet_test(_Config) ->
     Sheet = #{upper_total => 0, bonus => 0, lower_total => 0},
@@ -367,3 +373,7 @@ fill_large_straight_test(_Config) ->
         yatzy => 0, two_pairs => 10, full_house => 13, small_straight => 15,
         large_straight => 20, lower_total => 79},
     Sheet14 = yatzy_sheet:fill(large_straight, [3,2,5,6,4], Sheet13).
+
+start_game_test(_Config) ->
+    true = yatzy_player:start_game(ann),
+    yatzy_player:add_score(ann, ones, [1,2,3,1,4]).
