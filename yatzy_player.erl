@@ -11,69 +11,57 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--export([start_game/1, add_score/3, get_score/2, get_score_sheet/1]).
+-export([new/1, fill/3, get_score/2, sheet/1]).
 % I had to export these even though they are kinda internal
 -export([i_player/0]).
 -export([i_player/1]).
 
-start_game(Name) ->
-    io:format("~nWelcome to yatzy, ~p~n",[Name]),
+new(Name) ->
     Pid = spawn(yatzy_player, i_player,[]),
-    register(Name, Pid).
+    register(Name, Pid),
+    {ok, Pid}.
 
-%% This way you're not going to get the {ok, Value} or {error, Reason} back.
-%% Use the call/2 function from the book and make the player process a simple front to the
-%% sheet. The code here is what should be wrapping the player and turn, with some changes
-%% due to the player and turn behaving differently.
-add_score(Name, Atom, Dice) ->
-    io:format("~n~p - ",[Name]),
-    Name ! {add_score, Atom, Dice}.
+call(To, Msg) ->
+    To ! {self(), Msg},
+    receive
+        Res ->
+            Res
+    after
+        4000 ->
+            timeout
+    end.
+
+fill(Name, Atom, Dice) ->
+    call(Name, {fill, Atom, Dice}).
 
 get_score(Name, Atom) ->
-    io:format("~n~p - on your score sheet - ",[Name]),
-    Name ! {get_score, Atom}.
+    call(Name, {get_score, Atom}).
 
-get_score_sheet(Name) ->
-    io:format("~n~p - ",[Name]),
-    Name ! get_scores.
-
-i_pretty_print_map(Map) ->
-    List = maps:to_list(Map),
-    lists:keysort(2, List),
-    lists:foreach(fun({A,B}) -> io:fwrite("|~-16s|", [io_lib:write(A)]), io:fwrite("~6s|~n", [io_lib:write(B)]) end, List).
+sheet(Name) ->
+    call(Name, sheet).
 
 i_player() ->
     i_player(yatzy_sheet:new()).
 
 i_player(ScoreSheet) ->
-    NewScoreSheet =
-        receive
-            get_scores ->
-                i_pretty_print_map(ScoreSheet),
-                ScoreSheet;
-            {get_score, Atom} ->
-                io:format("score for ~w is ~p~n",[Atom, yatzy_sheet:get_score(Atom, ScoreSheet)]),
-                ScoreSheet;
-            {add_score, Atom, Dice} ->
-                NewSheet = yatzy_sheet:fill(Atom, Dice, ScoreSheet),
-                case NewSheet of
-                    already_filled ->
-                        io:format("The slot for ~w is already filled, no action taken:~n",[Atom]),
-                        i_pretty_print_map(ScoreSheet),
-                        ScoreSheet;
-                    ScoreSheet ->
-                        io:format(" - no action taken:~n",[]),
-                        i_pretty_print_map(ScoreSheet),
-                        ScoreSheet;
-                    _ ->
-                        io:format("~p score added to score sheet~n",[Atom]),
-                        case yatzy_sheet:all_slots_filled(NewSheet) of
-                            true ->
-                                io:format("  Game complete your total score is ------ ~p ------   ~n",[yatzy_sheet:get_score(grand_total, NewSheet)]);
-                            false ->
-                                io:format("~nNext turn~n",[])
-                        end,
-                        NewSheet
-                end
-        end,
-    i_player(NewScoreSheet).
+    receive
+        {From, sheet} ->
+            From ! {ok, ScoreSheet},
+            i_player(ScoreSheet);
+        {From, {get_score, Atom}} ->
+            From ! {ok, yatzy_sheet:get_score(Atom, ScoreSheet)},
+            i_player(ScoreSheet);
+        {From, {fill, Atom, Dice}} ->
+            NewSheet = yatzy_sheet:fill(Atom, Dice, ScoreSheet),
+            case NewSheet of
+                already_filled ->
+                    From ! {error, already_filled},
+                    i_player(ScoreSheet);
+                ScoreSheet ->
+                    From ! {error, no_action},
+                    i_player(ScoreSheet);
+                _ ->
+                    From ! {ok, yatzy_sheet:get_score(Atom, NewSheet)},
+                    i_player(NewSheet)
+            end
+    end.
