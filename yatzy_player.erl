@@ -21,6 +21,10 @@ start_game(Name) ->
     Pid = spawn(yatzy_player, i_player,[]),
     register(Name, Pid).
 
+%% This way you're not going to get the {ok, Value} or {error, Reason} back.
+%% Use the call/2 function from the book and make the player process a simple front to the
+%% sheet. The code here is what should be wrapping the player and turn, with some changes
+%% due to the player and turn behaving differently.
 add_score(Name, Atom, Dice) ->
     io:format("~n~p - ",[Name]),
     Name ! {add_score, Atom, Dice}.
