@@ -11,12 +11,12 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--export([new/0, fill/3, get_score/2, all_filled/1]).
+-export([new/0, fill/3, get_score/2, all_slots_filled/1]).
 
-%% I'd introduce a sheet() or t() type 
+ %% a type for the sheet
 -type t() :: map().
 
-%% and a type for the slots:
+%% a type for the slots:
 -type upper_slot() :: 'ones' | 'twos' | 'threes' | 'fours' | 'fives' |'sixes'.
 -type lower_slot() :: 'one_pair' | 'two_pairs' | 'full_house' | 'three_of_a_kind' | 'four_of_a_kind' | 'small_straight' | 'large_straight' | 'yatzy'.
 -type derived_slot() :: 'upper_total' | 'bonus' | 'lower_total'.
@@ -36,21 +36,21 @@ i_upper_value(fours) -> 4;
 i_upper_value(fives) -> 5;
 i_upper_value(sixes) -> 6.
 
-i_upper_slot_type(Slot) ->
+is_upper_slot_type(Slot) ->
     Uppers = [ones, twos, threes, fours, fives, sixes],
     lists:member(Slot, Uppers).
 
-i_lower_slot_type(Slot) ->
+is_lower_slot_type(Slot) ->
     Lowers = [one_pair, two_pairs, three_of_a_kind, four_of_a_kind, full_house, small_straight, large_straight, yatzy],
     lists:member(Slot, Lowers).
 
 -spec fill(Slot::slot(), ResultList::list(integer()), Sheet::t()) -> t().
 fill(Slot, ResultList, Sheet) ->
-    case i_upper_slot_type(Slot) of
+    case is_upper_slot_type(Slot) of
         true ->
             i_fill_uppers(Slot, i_upper_value(Slot), ResultList, Sheet);
         false ->
-            case i_lower_slot_type(Slot) of
+            case is_lower_slot_type(Slot) of
                 true ->
                     i_fill_lowers(Slot, ResultList, Sheet);
                 _ ->
@@ -59,8 +59,8 @@ fill(Slot, ResultList, Sheet) ->
             end
     end.
 
--spec all_filled(Sheet::map()) -> atom().
-all_filled(Sheet) ->
+-spec all_slots_filled(Sheet::map()) -> atom().
+all_slots_filled(Sheet) ->
     case maps:size(Sheet) of
         17 ->
             true;
@@ -123,11 +123,11 @@ all_filled_true_test() ->
         upper_total => 46, bonus => 0, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 16,
         yatzy => 0, two_pairs => 0, full_house => 0, small_straight => 0,
         large_straight => 0, grand_total => 0},
-    true = all_filled(Sheet).
+    true = all_slots_filled(Sheet).
 
 all_filled_false_test() ->
     Sheet = new(),
-    false = all_filled(Sheet).
+    false = all_slots_filled(Sheet).
 
 create_new_sheet_test() ->
     Sheet = #{upper_total => 0, bonus => 0, lower_total => 0},
@@ -212,9 +212,8 @@ i_fill_all_lowers_test() ->
         yatzy => 50, two_pairs => 12, full_house => 19, lower_total => 111},
     Sheet7 = #{upper_total => 0, bonus => 0, one_pair => 4, three_of_a_kind => 6, four_of_a_kind => 20,
         yatzy => 50, two_pairs => 12, full_house => 19, small_straight => 15, lower_total => 126},
-    Sheet8 = #{upper_total => 0, bonus => 0, one_pair => 4, three_of_a_kind => 6, four_of_a_kind => 20,
-        yatzy => 50, two_pairs => 12, full_house => 19, small_straight => 15,
-        large_straight => 20, lower_total => 146},
+    Sheet8 = #{upper_total => 0, bonus => 0, one_pair => 4, three_of_a_kind => 6, four_of_a_kind => 20, yatzy => 50,
+        two_pairs => 12, full_house => 19, small_straight => 15, large_straight => 20, lower_total => 146},
     Sheet = i_fill_lowers(one_pair, [1,2,2,5,1], new()),
     Sheet2 = i_fill_lowers(two_pairs, [4,4,2,2,5], Sheet),
     Sheet3 = i_fill_lowers(four_of_a_kind, [5,5,2,5,5], Sheet2),
@@ -238,11 +237,9 @@ fill_all_test() ->
     Sheet8 = #{ones => 2, twos => 4, threes => 6, fours => 20, fives => 25, sixes => 12,
         upper_total => 69, bonus => 50, one_pair => 4, three_of_a_kind => 9, lower_total => 13},
     Sheet9 = #{ones => 2, twos => 4, threes => 6, fours => 20, fives => 25, sixes => 12,
-        upper_total => 69, bonus => 50, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 8,
-        lower_total => 21},
+        upper_total => 69, bonus => 50, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 8, lower_total => 21},
     Sheet10 = #{ones => 2, twos => 4, threes => 6, fours => 20, fives => 25, sixes => 12,
-        upper_total => 69, bonus => 50, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 8,
-        lower_total => 21, yatzy => 0},
+        upper_total => 69, bonus => 50, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 8, lower_total => 21, yatzy => 0},
     Sheet11 = #{ones => 2, twos => 4, threes => 6, fours => 20, fives => 25, sixes => 12,
         upper_total => 69, bonus => 50, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 8,
         yatzy => 0, two_pairs => 10, lower_total => 31},
@@ -251,12 +248,10 @@ fill_all_test() ->
         yatzy => 0, two_pairs => 10, full_house => 13, lower_total => 44},
     Sheet13 = #{ones => 2, twos => 4, threes => 6, fours => 20, fives => 25, sixes => 12,
         upper_total => 69, bonus => 50, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 8,
-        yatzy => 0, two_pairs => 10, full_house => 13, small_straight => 15,
-        lower_total => 59},
-    Sheet14 = #{ones => 2, twos => 4, threes => 6, fours => 20, fives => 25, sixes => 12,
-        upper_total => 69, bonus => 50, one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 8,
-        yatzy => 0, two_pairs => 10, full_house => 13, small_straight => 15,
-        large_straight => 20, lower_total => 79},
+        yatzy => 0, two_pairs => 10, full_house => 13, small_straight => 15, lower_total => 59},
+    Sheet14 = #{ones => 2, twos => 4, threes => 6, fours => 20, fives => 25, sixes => 12, upper_total => 69, bonus => 50,
+        one_pair => 4, three_of_a_kind => 9, four_of_a_kind => 8, yatzy => 0, two_pairs => 10, full_house => 13,
+        small_straight => 15, large_straight => 20, lower_total => 79},
     Sheet = fill(ones, [2,1,3,1,2], new()),
     already_filled = fill(ones, [2,1,3,1,2], Sheet),
     Sheet2 = fill(twos, [2,1,3,1,2], Sheet),
