@@ -46,6 +46,9 @@ is_lower_slot_type(Slot) ->
 
 -spec fill(Slot::slot(), ResultList::list(integer()), Sheet::t()) -> t().
 fill(Slot, ResultList, Sheet) ->
+    % you can aviod the nested case by doing the two checks at the same time:
+    % case {is_upper_slot_tyep(Slot), is_lower_slot_type(Slot)} of
+    %     {true, false} -> ...
     case is_upper_slot_type(Slot) of
         true ->
             i_fill_uppers(Slot, i_upper_value(Slot), ResultList, Sheet);
@@ -79,6 +82,7 @@ get_score(Nums, Sheet) ->
             A
     end.
 
+%% you only need to use the i_ prefix when you use the same name as an exported function.
 i_fill_lowers(Lower, ResultList, Sheet) ->
     case get_score(Lower, Sheet) of
         empty ->
@@ -105,6 +109,8 @@ i_update_upper_totals(Score, Sheet) ->
     Sheet2 = maps:put(upper_total, UpperTotal + Score, Sheet),
     i_update_bonus(Bonus, UpperTotal + Score, Sheet2).
 
+%% this means that you will print this message every time you add beyond 63, wouldn't that
+%% be confusing?
 i_update_bonus(0, UpperTotal, Sheet) when UpperTotal >= 63 ->
     io:format("*** Upper Total reached 63 - Bonus of 50 ***~n",[]),
     maps:put(bonus, 50, Sheet);
