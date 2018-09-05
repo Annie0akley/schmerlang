@@ -31,7 +31,7 @@
 -export([fill_ones_test/1, fill_twos_test/1, fill_threes_test/1, fill_fours_test/1, fill_fives_test/1, fill_sixes_test/1]).
 -export([fill_one_pair_test/1, fill_three_of_a_kind_test/1, fill_four_of_a_kind_test/1, fill_two_pairs_test/1, fill_yatzy_test/1]).
 -export([fill_full_house_test/1, fill_small_straight_test/1, fill_large_straight_test/1]).
--export([start_game_test/1]).
+-export([new_player_test/1, new_turn_test/1]).
 
 all() ->
     [{group, upper_score}, {group, one_pair_score}, {group, three_of_a_kind_score}, {group, four_of_a_kind_score}, {group, two_pairs_score},
@@ -113,7 +113,7 @@ groups() ->
         {
             yatzy_player,
             [],
-            [start_game_test]
+            [new_player_test, new_turn_test]
         }
     ].
 
@@ -374,6 +374,15 @@ fill_large_straight_test(_Config) ->
         large_straight => 20, lower_total => 79},
     Sheet14 = yatzy_sheet:fill(large_straight, [3,2,5,6,4], Sheet13).
 
-start_game_test(_Config) ->
-    true = yatzy_player:start_game(ann),
-    yatzy_player:add_score(ann, ones, [1,2,3,1,4]).
+new_player_test(_Config) ->
+    {ok, _} = yatzy_player:new(ann),
+    {ok, 2} = yatzy_player:fill(ann, ones, [1,2,3,1,4]),
+    {ok, 2} = yatzy_player:get_score(ann, ones),
+    Sheet = #{ones => 2, upper_total => 2, bonus => 0, lower_total => 0},
+    {ok, Sheet} = yatzy_player:sheet(ann).
+
+new_turn_test(_Config) ->
+    {ok, _Pid} = yatzy_turn:start(),
+    ok = yatzy_turn:roll(_Pid),
+    invalid_keepers = yatzy_turn:roll(_Pid,[7,7]),
+    [_,_,_,_,_] = yatzy_turn:dice(_Pid).
