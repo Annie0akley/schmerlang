@@ -13,11 +13,12 @@
 
 -export([new/1, fill/3, get_score/2, sheet/1]).
 % I had to export these even though they are kinda internal
--export([i_player/0]).
--export([i_player/1]).
+-export([player/0]).
+-export([player/1]).
 
+-spec new(Name::atom()) -> {ok, Pid}.
 new(Name) ->
-    Pid = spawn(yatzy_player, i_player,[]),
+    Pid = spawn(yatzy_player, player,[]),
     register(Name, Pid),
     {ok, Pid}.
 
@@ -31,37 +32,37 @@ call(To, Msg) ->
             timeout
     end.
 
+-spec fill(Name::atom(), Atom::atom(), Dice::list()) -> {ok, Score::integer()}.
 fill(Name, Atom, Dice) ->
     call(Name, {fill, Atom, Dice}).
 
+-spec get_score(Name::atom(), Atom::atom()) -> {ok, Score::integer()}.
 get_score(Name, Atom) ->
     call(Name, {get_score, Atom}).
 
+-spec sheet(Name::atom()) -> {ok, ScoreSheet::map()}.
 sheet(Name) ->
     call(Name, sheet).
 
-i_player() ->
-    i_player(yatzy_sheet:new()).
+player() ->
+    player(yatzy_sheet:new()).
 
-i_player(ScoreSheet) ->
+player(ScoreSheet) ->
     receive
         {From, sheet} ->
             From ! {ok, ScoreSheet},
-            i_player(ScoreSheet);
+            player(ScoreSheet);
         {From, {get_score, Atom}} ->
             From ! {ok, yatzy_sheet:get_score(Atom, ScoreSheet)},
-            i_player(ScoreSheet);
+            player(ScoreSheet);
         {From, {fill, Atom, Dice}} ->
             NewSheet = yatzy_sheet:fill(Atom, Dice, ScoreSheet),
             case NewSheet of
-                already_filled ->
-                    From ! {error, already_filled},
-                    i_player(ScoreSheet);
-                ScoreSheet ->
-                    From ! {error, no_action},
-                    i_player(ScoreSheet);
+                {error, _Msg} ->
+                    From ! {error, _Msg},
+                    player(ScoreSheet);
                 _ ->
                     From ! {ok, yatzy_sheet:get_score(Atom, NewSheet)},
-                    i_player(NewSheet)
+                    player(NewSheet)
             end
     end.

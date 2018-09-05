@@ -17,10 +17,12 @@
 -export([second_throw/1]).
 -export([third_throw/1]).
 
+-spec start() -> {ok, Pid}.
 start() ->
     Pid = spawn(yatzy_turn, first_throw, [yatzy_score:roll()]),
     {ok, Pid}.
 
+-spec roll(TurnPid) -> ok.
 roll(TurnPid) ->
     call(TurnPid, roll).
 
@@ -34,12 +36,15 @@ call(To, Msg) ->
             timeout
     end.
 
+-spec roll(TurnPid) -> ok | invalid_keepers.
 roll(TurnPid, Keepers) ->
     call(TurnPid, {roll, Keepers}).
 
+-spec dice(TurnPid) -> Dice::list().
 dice(TurnPid) ->
     call(TurnPid, dice).
 
+-spec stop(TurnPid) -> Dice::list().
 stop(TurnPid) ->
     call(TurnPid, stop).
 
@@ -63,7 +68,6 @@ first_throw(Dice) ->
             From ! Dice,
             first_throw(Dice);
         {From, stop} ->
-            io:format("Throw complete~n", []),
             From ! Dice
     end.
 
@@ -87,7 +91,6 @@ second_throw(Dice) ->
             From ! Dice,
             second_throw(Dice);
         {From, stop} ->
-            io:format("Throw complete~n", []),
             From ! Dice
     end.
 

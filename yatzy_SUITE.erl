@@ -278,7 +278,8 @@ get_all_lowers_score_test(_Config) ->
 fill_ones_test(_Config) ->
     Sheet = #{ones => 2, upper_total => 2, bonus => 0, lower_total => 0},
     Sheet = yatzy_sheet:fill(ones, [2,1,3,1,2], yatzy_sheet:new()),
-    already_filled = yatzy_sheet:fill(ones, [2,1,3,1,2], Sheet).
+    {error, already_filled} = yatzy_sheet:fill(ones, [2,1,3,1,2], Sheet),
+    {error, none_slot} = yatzy_sheet:fill(tones, [2,1,3,1,2], Sheet).
 
 fill_twos_test(_Config) ->
     Sheet = #{ones => 2, upper_total => 2, bonus => 0, lower_total => 0},
