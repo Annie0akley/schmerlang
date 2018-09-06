@@ -36,12 +36,12 @@ upper_value(fours) -> 4;
 upper_value(fives) -> 5;
 upper_value(sixes) -> 6.
 
--spec is_upper_slot_type(Slot::slot()) -> atom().
+-spec is_upper_slot_type(Slot::slot()) -> boolean().
 is_upper_slot_type(Slot) ->
     Uppers = [ones, twos, threes, fours, fives, sixes],
     lists:member(Slot, Uppers).
 
--spec is_lower_slot_type(Slot::slot()) -> atom().
+-spec is_lower_slot_type(Slot::slot()) -> boolean().
 is_lower_slot_type(Slot) ->
     Lowers = [one_pair, two_pairs, three_of_a_kind, four_of_a_kind, full_house, small_straight, large_straight, yatzy],
     lists:member(Slot, Lowers).
@@ -57,7 +57,7 @@ fill(Slot, ResultList, Sheet) ->
             {error, none_slot}
     end.
 
--spec all_slots_filled(Sheet::map()) -> atom().
+-spec all_slots_filled(Sheet::map()) -> boolean().
 all_slots_filled(Sheet) ->
     case maps:size(Sheet) of
         17 ->

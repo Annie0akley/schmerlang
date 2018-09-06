@@ -1,0 +1,35 @@
+@startuml
+participant yatzy_turn order 10
+participant yatzy_player order 20
+participant yatzy_sheet order 30
+participant yatzy_score order 40
+
+Shell -> yatzy_player:new player
+yatzy_player --> Shell: ok
+
+Shell -> yatzy_turn:new turn
+yatzy_turn --> Shell: ok
+
+loop 3 times
+    Shell -> yatzy_turn: roll
+    yatzy_turn --> Shell: ok
+
+    Shell -> yatzy_turn: dice
+    yatzy_turn --> Shell: results
+
+end
+
+Shell -> yatzy_player: fill(Slot)
+yatzy_player -> yatzy_score:fill(Slot)
+yatzy_score --> yatzy_player: ok
+yatzy_player --> Shell: ok
+
+Shell -> yatzy_player: get_score
+yatzy_player -> yatzy_sheet: get_score
+yatzy_sheet --> yatzy_player:{ok, Score}
+yatzy_player --> Shell: {ok, Score}
+
+Shell -> yatzy_player: sheet
+yatzy_player --> Shell: {ok, Sheet}
+
+@enduml

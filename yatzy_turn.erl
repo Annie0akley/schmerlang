@@ -26,16 +26,6 @@ start() ->
 roll(TurnPid) ->
     call(TurnPid, roll).
 
-call(To, Msg) ->
-    To ! {self(), Msg},
-    receive
-        Res ->
-            Res
-    after
-        4000 ->
-            timeout
-    end.
-
 -spec roll(TurnPid) -> ok | invalid_keepers.
 roll(TurnPid, Keepers) ->
     call(TurnPid, {roll, Keepers}).
@@ -47,6 +37,16 @@ dice(TurnPid) ->
 -spec stop(TurnPid) -> Dice::list().
 stop(TurnPid) ->
     call(TurnPid, stop).
+
+call(To, Msg) ->
+    To ! {self(), Msg},
+    receive
+        Res ->
+            Res
+    after
+        4000 ->
+            timeout
+    end.
 
 first_throw(Dice) ->
     receive

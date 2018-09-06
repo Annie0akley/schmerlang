@@ -22,16 +22,6 @@ new(Name) ->
     register(Name, Pid),
     {ok, Pid}.
 
-call(To, Msg) ->
-    To ! {self(), Msg},
-    receive
-        Res ->
-            Res
-    after
-        4000 ->
-            timeout
-    end.
-
 -spec fill(Name::atom(), Atom::atom(), Dice::list()) -> {ok, Score::integer()}.
 fill(Name, Atom, Dice) ->
     call(Name, {fill, Atom, Dice}).
@@ -43,6 +33,16 @@ get_score(Name, Atom) ->
 -spec sheet(Name::atom()) -> {ok, ScoreSheet::map()}.
 sheet(Name) ->
     call(Name, sheet).
+
+call(To, Msg) ->
+    To ! {self(), Msg},
+    receive
+        Res ->
+            Res
+    after
+        4000 ->
+            timeout
+    end.
 
 player() ->
     player(yatzy_sheet:new()).
